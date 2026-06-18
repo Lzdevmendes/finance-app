@@ -16,9 +16,9 @@ import {
   BarChart,
   Bar,
 } from 'recharts';
-import { useFinance } from '../contexts/FinanceContext';
-import { CategoryIcon } from '../components/CategoryIcon';
-import { useTransactionStats } from '../hooks/useTransactionStats';
+import { useFinance } from '../../contexts/FinanceContext';
+import { CategoryIcon } from '../../components/CategoryIcon';
+import { useTransactionStats } from '../../hooks/useTransactionStats';
 
 const COLORS = ['#10b981', '#3b82f6', '#8b5cf6', '#f97316', '#ef4444'];
 
