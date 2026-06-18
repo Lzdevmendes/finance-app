@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useAuth } from '../../contexts/AuthContext';
 import type { LoginData } from './components/LoginModal';
+import { logError } from '../../utils/logger';
 
 export function useSettingsActions() {
   const { user, updateUserProfile, updateUserEmail, updateUserPassword, reauthenticate } = useAuth();
@@ -12,14 +13,14 @@ export function useSettingsActions() {
     setLoading(true);
     try {
       const result = await updateUserProfile({ photoURL: avatarSrc });
-      if (result.error) {
+      if (!result.ok) {
         alert('Erro ao atualizar avatar: ' + result.error.message);
       } else {
         alert('Avatar atualizado com sucesso!');
         onSuccess();
       }
     } catch (error) {
-      console.error('Error updating avatar:', error);
+      logError('Error updating avatar:', error);
       alert('Erro ao atualizar avatar. Tente novamente.');
     } finally {
       setLoading(false);
@@ -43,11 +44,11 @@ export function useSettingsActions() {
 
       // Re-authenticate user before making changes
       const reauthResult = await reauthenticate(loginData.currentPassword);
-      if (reauthResult.error) throw reauthResult.error;
+      if (!reauthResult.ok) throw reauthResult.error;
 
       if (loginData.newEmail !== user?.email) {
         const result = await updateUserEmail(loginData.newEmail);
-        if (result.error) {
+        if (!result.ok) {
           alert('Erro ao atualizar email: ' + result.error.message);
           return;
         }
@@ -56,7 +57,7 @@ export function useSettingsActions() {
 
       if (loginData.newPassword) {
         const result = await updateUserPassword(loginData.newPassword);
-        if (result.error) {
+        if (!result.ok) {
           alert('Erro ao atualizar senha: ' + result.error.message);
           return;
         }
@@ -69,14 +70,16 @@ export function useSettingsActions() {
       } else {
         alert('Nenhuma alteração foi feita.');
       }
-    } catch (error: any) {
-      console.error('Login update error:', error);
-      if (error.code === 'auth/wrong-password') {
+    } catch (error) {
+      logError('Login update error:', error);
+      const code = (error as { code?: string }).code;
+      const message = error instanceof Error ? error.message : 'Erro desconhecido';
+      if (code === 'auth/wrong-password') {
         alert('Senha atual incorreta. Por favor, verifique e tente novamente.');
-      } else if (error.code === 'auth/requires-recent-login') {
+      } else if (code === 'auth/requires-recent-login') {
         alert('Por segurança, faça login novamente antes de alterar suas informações.');
       } else {
-        alert('Erro ao atualizar informações: ' + (error.message || 'Erro desconhecido'));
+        alert('Erro ao atualizar informações: ' + message);
       }
     } finally {
       setLoading(false);

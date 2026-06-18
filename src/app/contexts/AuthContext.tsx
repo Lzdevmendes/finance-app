@@ -1,22 +1,19 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import * as authService from '../services/auth.service';
 import type { User } from '../services/auth.service';
-
-interface AuthResult {
-  error: Error | null;
-}
+import { Result, ok, err } from '../utils/result';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<AuthResult>;
-  signUp: (email: string, password: string, name?: string) => Promise<AuthResult>;
+  signIn: (email: string, password: string) => Promise<Result>;
+  signUp: (email: string, password: string, name?: string) => Promise<Result>;
   signOut: () => Promise<void>;
-  updateUserProfile: (updates: { displayName?: string; photoURL?: string }) => Promise<AuthResult>;
-  updateUserEmail: (newEmail: string) => Promise<AuthResult>;
-  updateUserPassword: (newPassword: string) => Promise<AuthResult>;
-  reauthenticate: (currentPassword: string) => Promise<AuthResult>;
-  uploadProfileImage: (file: File) => Promise<AuthResult & { url?: string }>;
+  updateUserProfile: (updates: { displayName?: string; photoURL?: string }) => Promise<Result>;
+  updateUserEmail: (newEmail: string) => Promise<Result>;
+  updateUserPassword: (newPassword: string) => Promise<Result>;
+  reauthenticate: (currentPassword: string) => Promise<Result>;
+  uploadProfileImage: (file: File) => Promise<Result<string>>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -33,21 +30,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return () => unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, name?: string): Promise<AuthResult> => {
+  const signUp = async (email: string, password: string, name?: string): Promise<Result> => {
     try {
       await authService.signUp(email, password, name);
-      return { error: null };
+      return ok(undefined);
     } catch (error) {
-      return { error: error as Error };
+      return err(error);
     }
   };
 
-  const signIn = async (email: string, password: string): Promise<AuthResult> => {
+  const signIn = async (email: string, password: string): Promise<Result> => {
     try {
       await authService.signIn(email, password);
-      return { error: null };
+      return ok(undefined);
     } catch (error) {
-      return { error: error as Error };
+      return err(error);
     }
   };
 
@@ -58,60 +55,60 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const updateUserProfile = async (updates: {
     displayName?: string;
     photoURL?: string;
-  }): Promise<AuthResult> => {
+  }): Promise<Result> => {
     try {
       if (user) {
         const updated = await authService.updateUserProfile(user, updates);
         setUser(updated);
       }
-      return { error: null };
+      return ok(undefined);
     } catch (error) {
-      return { error: error as Error };
+      return err(error);
     }
   };
 
-  const updateUserEmail = async (newEmail: string): Promise<AuthResult> => {
+  const updateUserEmail = async (newEmail: string): Promise<Result> => {
     try {
       if (user) {
         await authService.updateUserEmail(user, newEmail);
         setUser({ ...user, email: newEmail } as User);
       }
-      return { error: null };
+      return ok(undefined);
     } catch (error) {
-      return { error: error as Error };
+      return err(error);
     }
   };
 
-  const updateUserPassword = async (newPassword: string): Promise<AuthResult> => {
+  const updateUserPassword = async (newPassword: string): Promise<Result> => {
     try {
       if (user) {
         await authService.updateUserPassword(user, newPassword);
       }
-      return { error: null };
+      return ok(undefined);
     } catch (error) {
-      return { error: error as Error };
+      return err(error);
     }
   };
 
-  const reauthenticate = async (currentPassword: string): Promise<AuthResult> => {
+  const reauthenticate = async (currentPassword: string): Promise<Result> => {
     try {
       if (user) {
         await authService.reauthenticate(user, currentPassword);
       }
-      return { error: null };
+      return ok(undefined);
     } catch (error) {
-      return { error: error as Error };
+      return err(error);
     }
   };
 
-  const uploadProfileImage = async (file: File): Promise<AuthResult & { url?: string }> => {
+  const uploadProfileImage = async (file: File): Promise<Result<string>> => {
     try {
       if (!user) throw new Error('User not authenticated');
       const url = await authService.uploadProfileImage(user, file);
       setUser({ ...user, photoURL: url } as User);
-      return { error: null, url };
+      return ok(url);
     } catch (error) {
-      return { error: error as Error };
+      return err(error);
     }
   };
 

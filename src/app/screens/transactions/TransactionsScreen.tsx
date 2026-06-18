@@ -4,6 +4,7 @@ import { Filter } from 'lucide-react';
 import { useFinance } from '../../contexts/FinanceContext';
 import { themes } from '../../constants/ui';
 import { Transaction } from '../../types';
+import { logError } from '../../utils/logger';
 import { TransactionFilters } from './components/TransactionFilters';
 import { TransactionItem } from './components/TransactionItem';
 import { EditTransactionModal, type EditingTransaction } from './components/EditTransactionModal';
@@ -89,7 +90,7 @@ export function TransactionsScreen() {
       setShowEditModal(false);
       setEditingTransaction(null);
     } catch (error) {
-      console.error('Error updating transaction:', error);
+      logError('Error updating transaction:', error);
     } finally {
       setEditLoading(false);
     }

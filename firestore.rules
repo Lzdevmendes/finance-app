@@ -2,39 +2,53 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Regras para usuários - cada usuário só acessa seus próprios dados
-    match /users/{userId}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
     }
 
-    // Regra específica para preferências
+    // Documento raiz do usuário (cada um só acessa o próprio).
+    // NOTA: não usamos mais um catch-all {document=**} com write porque ele
+    // anularia (OR) as validações de campo das subcoleções abaixo.
+    match /users/{userId} {
+      allow read, write: if isOwner(userId);
+    }
+
+    // Preferências
     match /users/{userId}/preferences/{document} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if isOwner(userId);
     }
 
-    // Validações adicionais para transações
+    // Transações — validação de tipo/valor/tamanho (defesa em profundidade)
     match /users/{userId}/transactions/{transactionId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId
+      allow read: if isOwner(userId);
+      allow delete: if isOwner(userId);
+      allow create, update: if isOwner(userId)
         && request.resource.data.userId == userId
         && request.resource.data.value is number
         && request.resource.data.value > 0
+        && request.resource.data.value < 1000000000
         && request.resource.data.type in ['income', 'expense']
         && request.resource.data.description is string
         && request.resource.data.description.size() > 0
         && request.resource.data.description.size() <= 100
         && request.resource.data.category is string
-        && request.resource.data.date is string;
+        && request.resource.data.date is string
+        && request.resource.data.tags is list
+        && request.resource.data.tags.size() <= 20;
     }
 
-    // Validações para metas
+    // Metas
     match /users/{userId}/goals/{goalId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId
+      allow read: if isOwner(userId);
+      allow delete: if isOwner(userId);
+      allow create, update: if isOwner(userId)
         && request.resource.data.userId == userId
         && request.resource.data.name is string
         && request.resource.data.name.size() > 0
         && request.resource.data.name.size() <= 50
         && request.resource.data.targetAmount is number
         && request.resource.data.targetAmount > 0
+        && request.resource.data.targetAmount < 1000000000
         && request.resource.data.currentAmount is number
         && request.resource.data.currentAmount >= 0;
     }

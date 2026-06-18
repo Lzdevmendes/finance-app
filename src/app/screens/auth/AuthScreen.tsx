@@ -18,11 +18,11 @@ export function AuthScreen() {
     setError('');
     setSuccess('');
     setLoading(true);
-    const { error } = isLogin
+    const result = isLogin
       ? await signIn(email, password)
       : await signUp(email, password, name);
-    if (error) {
-      setError(error.message || 'Ocorreu um erro. Tente novamente.');
+    if (!result.ok) {
+      setError(result.error.message || 'Ocorreu um erro. Tente novamente.');
     } else if (!isLogin) {
       setSuccess('Conta criada com sucesso! Faça o login.');
       setIsLogin(true);

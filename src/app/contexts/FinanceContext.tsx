@@ -4,6 +4,7 @@ import { Transaction, Goal, UserPreferences } from '../types';
 import * as transactionsService from '../services/transactions.service';
 import * as goalsService from '../services/goals.service';
 import * as preferencesService from '../services/preferences.service';
+import { logError } from '../utils/logger';
 
 const DEFAULT_PREFERENCES: UserPreferences = { theme: 'emerald', darkMode: false, currency: 'BRL' };
 
@@ -43,17 +44,17 @@ export function FinanceProvider({ children }: { children: React.ReactNode }) {
     const unsubTrans = transactionsService.subscribeTransactions(
       user.uid,
       setTransactions,
-      (err) => console.error('Erro transações:', err),
+      (err) => logError('Erro transações:', err),
     );
     const unsubGoals = goalsService.subscribeGoals(
       user.uid,
       setGoals,
-      (err) => console.error('Erro metas:', err),
+      (err) => logError('Erro metas:', err),
     );
     const unsubPrefs = preferencesService.subscribePreferences(
       user.uid,
       setPreferences,
-      (err) => console.error('Erro preferências:', err),
+      (err) => logError('Erro preferências:', err),
     );
 
     setLoading(false);

@@ -6,6 +6,7 @@ import { useFinance } from '../../contexts/FinanceContext';
 import { TagInput } from '../TagInput';
 import { categories } from '../../constants/ui';
 import { TransactionType, CategoryType, AccountType } from '../../types';
+import { logError } from '../../utils/logger';
 
 const todayString = () => {
   const now = new Date();
@@ -109,7 +110,7 @@ export function TransactionForm({ darkMode, onClose }: { darkMode: boolean; onCl
       account,
       tags,
       date: new Date(date + 'T12:00:00').toISOString(),
-    }).catch((err: unknown) => console.error('Error saving transaction:', err));
+    }).catch((err: unknown) => logError('Error saving transaction:', err));
 
     resetForm();
     onClose();
