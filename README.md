@@ -22,6 +22,23 @@ Aplicação completa de organização financeira pessoal, 100% mobile-first, ins
 - **PWA**: Service Worker + Manifest
 - **Build**: Vite
 - **Deploy**: Vercel
+- **Testes**: Vitest + Testing Library
+- **Lint**: ESLint (flat config)
+
+## 🧪 Desenvolvimento e Qualidade
+
+```bash
+npm run dev          # servidor de desenvolvimento
+npm run typecheck    # tsc --noEmit
+npm run lint         # eslint .
+npm test             # testes (Vitest)
+npm run build        # tsc + vite build
+```
+
+**CI/CD:** todo push e PR para `main` dispara o GitHub Actions
+(`.github/workflows/ci.yml`): install → typecheck → lint → test → build.
+A Vercel faz o deploy de produção da `main` automaticamente, em paralelo ao CI.
+Detalhes de arquitetura, decisões e fluxo em [`ARCHITECTURE.md`](./ARCHITECTURE.md).
 
 ## 🚀 Configuração para Produção
 
