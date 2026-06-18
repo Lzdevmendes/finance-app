@@ -6,6 +6,15 @@ on:
   pull_request:
     branches: [main]
 
+# Least-privilege: o CI só precisa ler o repositório.
+permissions:
+  contents: read
+
+# Cancela runs antigos do mesmo ref quando um novo começa.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   quality:
     name: Typecheck, Lint, Test, Build
