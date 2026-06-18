@@ -1,13 +1,23 @@
-import { useState } from 'react';
+import { useState, lazy, Suspense } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Wallet, Calendar, Target, Settings, Plus } from 'lucide-react';
 import { useFinance } from '../contexts/FinanceContext';
-import { Dashboard } from './dashboard/Dashboard';
-import { TransactionsScreen } from './transactions/TransactionsScreen';
-import { GoalsScreen } from './goals/GoalsScreen';
-import { SettingsScreen } from './settings/SettingsScreen';
 import { TransactionModal } from '../components/modals/TransactionModal';
 import { themes } from '../constants/ui';
+
+// Cada tela carregada sob demanda (a do dashboard puxa o chunk do recharts).
+const Dashboard = lazy(() => import('./dashboard/Dashboard').then((m) => ({ default: m.Dashboard })));
+const TransactionsScreen = lazy(() => import('./transactions/TransactionsScreen').then((m) => ({ default: m.TransactionsScreen })));
+const GoalsScreen = lazy(() => import('./goals/GoalsScreen').then((m) => ({ default: m.GoalsScreen })));
+const SettingsScreen = lazy(() => import('./settings/SettingsScreen').then((m) => ({ default: m.SettingsScreen })));
+
+function ScreenFallback() {
+  return (
+    <div className="flex justify-center py-20 opacity-60">
+      <div className="animate-spin rounded-full h-10 w-10 border-4 border-emerald-600 border-t-transparent" />
+    </div>
+  );
+}
 
 export function MainApp() {
   const { preferences } = useFinance();
@@ -50,12 +60,14 @@ export function MainApp() {
       </header>
       {/* Main Content */}
       <main className="fixed top-20 left-0 right-0 overflow-y-auto scrollbar-hide p-4 max-w-md mx-auto" style={{ bottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))' }}>
-        <AnimatePresence mode="wait">
-          {activeTab === 'dashboard' && <Dashboard key="dashboard" />}
-          {activeTab === 'transactions' && <TransactionsScreen key="transactions" />}
-          {activeTab === 'goals' && <GoalsScreen key="goals" />}
-          {activeTab === 'settings' && <SettingsScreen key="settings" />}
-        </AnimatePresence>
+        <Suspense fallback={<ScreenFallback />}>
+          <AnimatePresence mode="wait">
+            {activeTab === 'dashboard' && <Dashboard key="dashboard" />}
+            {activeTab === 'transactions' && <TransactionsScreen key="transactions" />}
+            {activeTab === 'goals' && <GoalsScreen key="goals" />}
+            {activeTab === 'settings' && <SettingsScreen key="settings" />}
+          </AnimatePresence>
+        </Suspense>
       </main>
       {/* Floating Action Button - Only show on dashboard */}
       {activeTab === 'dashboard' && (

@@ -40,4 +40,18 @@ export default defineConfig({
 
   // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
   assetsInclude: ['**/*.svg', '**/*.csv'],
+
+  build: {
+    rollupOptions: {
+      output: {
+        // Separa as libs pesadas em chunks próprios (melhor cache + carregamento paralelo)
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return;
+          if (id.includes('recharts') || id.includes('d3-') || id.includes('victory-vendor')) return 'recharts';
+          if (id.includes('firebase') || id.includes('@firebase')) return 'firebase';
+          if (id.includes('framer-motion') || id.includes('motion-dom') || id.includes('motion-utils')) return 'motion';
+        },
+      },
+    },
+  },
 })
