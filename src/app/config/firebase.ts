@@ -14,6 +14,14 @@ const firebaseConfig = {
   measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
+// Falha cedo e de forma clara se faltar configuração (evita "tela branca" silenciosa).
+if (!firebaseConfig.apiKey) {
+  throw new Error(
+    'Configuração do Firebase ausente: defina as variáveis VITE_FIREBASE_* num arquivo .env ' +
+    'na raiz do projeto (copie de .env.example com as credenciais do seu projeto Firebase).',
+  );
+}
+
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
