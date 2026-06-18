@@ -1,136 +1,117 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import {
-  onAuthStateChanged,
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  updateProfile,
-  signOut as firebaseSignOut,
-  updateEmail,
-  updatePassword,
-} from 'firebase/auth';
-import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { auth, db, storage } from '../config/firebase';
+import * as authService from '../services/auth.service';
+import type { User } from '../services/auth.service';
 
-export { db, storage };
+interface AuthResult {
+  error: Error | null;
+}
 
 interface AuthContextType {
-  user: any;
+  user: User | null;
   loading: boolean;
-  signIn: (email: string, password: string) => Promise<{ error: any }>;
-  signUp: (email: string, password: string, name?: string) => Promise<{ error: any }>;
+  signIn: (email: string, password: string) => Promise<AuthResult>;
+  signUp: (email: string, password: string, name?: string) => Promise<AuthResult>;
   signOut: () => Promise<void>;
-  updateUserProfile: (updates: { displayName?: string; photoURL?: string }) => Promise<{ error: any }>;
-  updateUserEmail: (newEmail: string) => Promise<{ error: any }>;
-  updateUserPassword: (newPassword: string) => Promise<{ error: any }>;
-  uploadProfileImage: (file: File) => Promise<{ error: any; url?: string }>;
+  updateUserProfile: (updates: { displayName?: string; photoURL?: string }) => Promise<AuthResult>;
+  updateUserEmail: (newEmail: string) => Promise<AuthResult>;
+  updateUserPassword: (newPassword: string) => Promise<AuthResult>;
+  reauthenticate: (currentPassword: string) => Promise<AuthResult>;
+  uploadProfileImage: (file: File) => Promise<AuthResult & { url?: string }>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (u) => {
+    const unsubscribe = authService.onAuthChange((u) => {
       setUser(u);
       setLoading(false);
     });
     return () => unsubscribe();
   }, []);
 
-  const signUp = async (email: string, password: string, name?: string) => {
+  const signUp = async (email: string, password: string, name?: string): Promise<AuthResult> => {
     try {
-      const { user } = await createUserWithEmailAndPassword(auth, email, password);
-      if (name && user) {
-        await updateProfile(user, { displayName: name });
-      }
+      await authService.signUp(email, password, name);
       return { error: null };
-    } catch (error: any) {
-      return { error };
+    } catch (error) {
+      return { error: error as Error };
     }
   };
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = async (email: string, password: string): Promise<AuthResult> => {
     try {
-      await signInWithEmailAndPassword(auth, email, password);
+      await authService.signIn(email, password);
       return { error: null };
-    } catch (error: any) {
-      return { error };
+    } catch (error) {
+      return { error: error as Error };
     }
   };
 
   const signOut = async () => {
-    await firebaseSignOut(auth);
+    await authService.signOut();
   };
 
-  const updateUserProfile = async (updates: { displayName?: string; photoURL?: string }) => {
+  const updateUserProfile = async (updates: {
+    displayName?: string;
+    photoURL?: string;
+  }): Promise<AuthResult> => {
     try {
       if (user) {
-        await updateProfile(user, updates);
-        // Force refresh of user data by reloading the current user
-        await auth.currentUser?.reload();
-        const updatedUser = auth.currentUser;
-        setUser(updatedUser);
+        const updated = await authService.updateUserProfile(user, updates);
+        setUser(updated);
       }
       return { error: null };
-    } catch (error: any) {
-      return { error };
+    } catch (error) {
+      return { error: error as Error };
     }
   };
 
-  const updateUserEmail = async (newEmail: string) => {
+  const updateUserEmail = async (newEmail: string): Promise<AuthResult> => {
     try {
       if (user) {
-        await updateEmail(user, newEmail);
-        setUser({ ...user, email: newEmail });
+        await authService.updateUserEmail(user, newEmail);
+        setUser({ ...user, email: newEmail } as User);
       }
       return { error: null };
-    } catch (error: any) {
-      return { error };
+    } catch (error) {
+      return { error: error as Error };
     }
   };
 
-  const updateUserPassword = async (newPassword: string) => {
+  const updateUserPassword = async (newPassword: string): Promise<AuthResult> => {
     try {
       if (user) {
-        await updatePassword(user, newPassword);
+        await authService.updateUserPassword(user, newPassword);
       }
       return { error: null };
-    } catch (error: any) {
-      return { error };
+    } catch (error) {
+      return { error: error as Error };
     }
   };
 
-  const uploadProfileImage = async (file: File) => {
+  const reauthenticate = async (currentPassword: string): Promise<AuthResult> => {
+    try {
+      if (user) {
+        await authService.reauthenticate(user, currentPassword);
+      }
+      return { error: null };
+    } catch (error) {
+      return { error: error as Error };
+    }
+  };
+
+  const uploadProfileImage = async (file: File): Promise<AuthResult & { url?: string }> => {
     try {
       if (!user) throw new Error('User not authenticated');
-
-      console.log('Starting upload for user:', user.uid);
-      console.log('File to upload:', file.name, file.size, file.type);
-
-      const storageRef = ref(storage, `profile-images/${user.uid}`);
-      console.log('Storage ref created:', storageRef.fullPath);
-
-      const snapshot = await uploadBytes(storageRef, file);
-      console.log('Upload completed, snapshot:', snapshot);
-
-      const url = await getDownloadURL(snapshot.ref);
-      console.log('Download URL obtained:', url);
-
-      // Update user profile with new photo URL
-      await updateProfile(user, { photoURL: url });
-      console.log('Firebase Auth profile updated');
-
-      // Force update local state immediately
-      const updatedUser = { ...user, photoURL: url };
-      setUser(updatedUser);
-      console.log('Local user state updated immediately');
-
+      const url = await authService.uploadProfileImage(user, file);
+      setUser({ ...user, photoURL: url } as User);
       return { error: null, url };
-    } catch (error: any) {
-      console.error('Upload profile image error:', error);
-      return { error };
+    } catch (error) {
+      return { error: error as Error };
     }
   };
 
@@ -145,6 +126,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         updateUserProfile,
         updateUserEmail,
         updateUserPassword,
+        reauthenticate,
         uploadProfileImage,
       }}
     >

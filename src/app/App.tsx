@@ -1,7 +1,6 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { EmailAuthProvider, reauthenticateWithCredential } from 'firebase/auth';
 import {
   Plus,
   ArrowUpCircle,
@@ -32,6 +31,7 @@ import {
 } from 'lucide-react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { FinanceProvider, useFinance } from './contexts/FinanceContext';
+import { ThemeProvider } from './contexts/ThemeContext';
 import { CategoryIcon } from './components/CategoryIcon';
 import { TagInput } from './components/TagInput';
 import { Dashboard } from './screens/Dashboard';
@@ -1706,7 +1706,7 @@ function GoalsScreen() {
   );
 }
 function SettingsScreen() {
-  const { user, signOut, updateUserProfile, updateUserEmail, updateUserPassword } = useAuth();
+  const { user, signOut, updateUserProfile, updateUserEmail, updateUserPassword, reauthenticate } = useAuth();
   const { transactions, preferences, updatePreferences, goals } = useFinance();
   const { theme, darkMode } = preferences;
 
@@ -1894,9 +1894,8 @@ function SettingsScreen() {
 
       // Re-authenticate user before making changes
       if (loginData.currentPassword) {
-        const credential = EmailAuthProvider.credential(user?.email || '', loginData.currentPassword);
-        await reauthenticateWithCredential(user, credential);
-        console.log('User re-authenticated successfully');
+        const reauthResult = await reauthenticate(loginData.currentPassword);
+        if (reauthResult.error) throw reauthResult.error;
       }
 
       if (loginData.newEmail !== user?.email) {
@@ -2089,7 +2088,7 @@ function SettingsScreen() {
       </div>
       {/* User Info */}
       <div className="text-center opacity-30 text-xs space-y-1">
-        <p>ID: {user?.id?.slice(0, 8)}...</p>
+        <p>ID: {user?.uid?.slice(0, 8)}...</p>
         <p>Email: {user?.email}</p>
         <p className="font-semibold">Finanças Pro v1.0.0</p>
         <p>Desenvolvido com ❤️</p>
@@ -2410,7 +2409,9 @@ function AppContent() {
   }
   return (
     <FinanceProvider>
-      <MainApp />
+      <ThemeProvider>
+        <MainApp />
+      </ThemeProvider>
     </FinanceProvider>
   );
 }
