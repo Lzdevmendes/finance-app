@@ -1,5 +1,5 @@
 // src/app/screens/Dashboard.tsx
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowUpCircle, ArrowDownCircle, PieChart as PieChartIcon, TrendingUp, BarChart3 } from 'lucide-react';
 import {
@@ -33,7 +33,7 @@ const categories = [
 
 export function Dashboard() {
   const { transactions, preferences } = useFinance();
-  const { theme, darkMode } = preferences;
+  const { darkMode } = preferences;
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const now = new Date();
     return now.getMonth() + 1;
@@ -234,7 +234,7 @@ export function Dashboard() {
                       labelLine={false}
                       style={{ filter: 'url(#pieGlow) url(#pieShadow)' }}
                     >
-                      {chartData.map((entry, index) => (
+                      {chartData.map((_entry, index) => (
                         <Cell
                           key={`cell-${index}`}
                           fill={COLORS[index % COLORS.length]}

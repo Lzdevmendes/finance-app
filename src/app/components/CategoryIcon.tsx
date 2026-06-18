@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   ShoppingCart,
-  Coffee,
   Home,
   Car,
   Heart,

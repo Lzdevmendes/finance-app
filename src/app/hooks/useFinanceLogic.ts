@@ -1,7 +1,7 @@
 // hooks/useFinanceLogic.ts - Hook otimizado para lógica de finanças
 import { useMemo, useCallback } from 'react';
 import { useFinance } from '../contexts/FinanceContext';
-import { Goal, GoalWithFeasibility, CategoryExpense, Transaction } from '../types';
+import { Goal, GoalWithFeasibility, CategoryExpense } from '../types';
 
 export function useFinanceLogic() {
   const {
