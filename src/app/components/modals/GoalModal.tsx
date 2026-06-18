@@ -5,6 +5,7 @@ import { X } from 'lucide-react';
 import CurrencyInput from 'react-currency-input-field';
 import { useFinance } from '../../contexts/FinanceContext';
 import { themes } from '../../constants/ui';
+import { Goal } from '../../types';
 
 export function GoalModal({
   show,
@@ -17,7 +18,7 @@ export function GoalModal({
   onClose: () => void;
   darkMode: boolean;
   theme: keyof typeof themes;
-  editGoal?: any;
+  editGoal?: Goal | null;
 }) {
   const { addGoal, updateGoal } = useFinance();
   const [name, setName] = useState(editGoal?.name || '');
@@ -74,10 +75,10 @@ export function GoalModal({
     // Fire-and-forget: fecha o modal imediatamente, Firebase sincroniza via onSnapshot
     if (editGoal) {
       updateGoal(editGoal.id, { name, targetAmount: targetNum, currentAmount: currentNum })
-        .catch((err: any) => console.error('Error updating goal:', err));
+        .catch((err: unknown) => console.error('Error updating goal:', err));
     } else {
       addGoal({ name, targetAmount: targetNum, currentAmount: currentNum, icon: 'target', color: theme })
-        .catch((err: any) => console.error('Error adding goal:', err));
+        .catch((err: unknown) => console.error('Error adding goal:', err));
     }
 
     resetForm();

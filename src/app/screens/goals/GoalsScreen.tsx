@@ -5,14 +5,15 @@ import CurrencyInput from 'react-currency-input-field';
 import { useFinance } from '../../contexts/FinanceContext';
 import { GoalModal } from '../../components/modals/GoalModal';
 import { themes } from '../../constants/ui';
+import { Goal } from '../../types';
 
 export function GoalsScreen() {
   const { goals, transactions, deleteGoal, updateGoal, preferences } = useFinance();
   const { theme, darkMode } = preferences;
   const [showGoalModal, setShowGoalModal] = useState(false);
-  const [editingGoal, setEditingGoal] = useState<any>(null);
+  const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
   const [showProgressModal, setShowProgressModal] = useState(false);
-  const [progressGoal, setProgressGoal] = useState<any>(null);
+  const [progressGoal, setProgressGoal] = useState<Goal | null>(null);
   const [progressAmount, setProgressAmount] = useState('');
   // Calculate monthly savings average
   const monthlySavings = useMemo(() => {
@@ -29,11 +30,11 @@ export function GoalsScreen() {
       .reduce((acc, t) => acc + t.value, 0);
     return (income - expenses) / 3;
   }, [transactions]);
-  const handleEdit = (goal: any) => {
+  const handleEdit = (goal: Goal) => {
     setEditingGoal(goal);
     setShowGoalModal(true);
   };
-  const handleAddProgress = (goal: any) => {
+  const handleAddProgress = (goal: Goal) => {
     setProgressGoal(goal);
     setProgressAmount('');
     setShowProgressModal(true);
