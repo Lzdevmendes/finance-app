@@ -20,6 +20,7 @@ const TransactionsScreen = lazy(() =>
 const GoalsScreen = lazy(() => import('./goals/GoalsScreen').then((m) => ({ default: m.GoalsScreen })));
 const SettingsScreen = lazy(() => import('./settings/SettingsScreen').then((m) => ({ default: m.SettingsScreen })));
 const BudgetsScreen = lazy(() => import('./budgets/BudgetsScreen').then((m) => ({ default: m.BudgetsScreen })));
+const ReportsScreen = lazy(() => import('./reports/ReportsScreen').then((m) => ({ default: m.ReportsScreen })));
 
 function ScreenFallback() {
   return (
@@ -68,14 +69,7 @@ export function MainApp() {
               {screen === 'budgets' && <BudgetsScreen />}
               {screen === 'more' && <MoreScreen />}
               {screen === 'goals' && <GoalsScreen />}
-              {screen === 'reports' && (
-                <ComingSoon
-                  title="Relatórios"
-                  emoji="📊"
-                  description="Score de saúde financeira, fluxo de caixa e seus maiores gastos."
-                  back="more"
-                />
-              )}
+              {screen === 'reports' && <ReportsScreen />}
               {screen === 'accounts' && (
                 <ComingSoon
                   title="Contas & Cartões"
