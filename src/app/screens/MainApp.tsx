@@ -19,6 +19,7 @@ const TransactionsScreen = lazy(() =>
 );
 const GoalsScreen = lazy(() => import('./goals/GoalsScreen').then((m) => ({ default: m.GoalsScreen })));
 const SettingsScreen = lazy(() => import('./settings/SettingsScreen').then((m) => ({ default: m.SettingsScreen })));
+const BudgetsScreen = lazy(() => import('./budgets/BudgetsScreen').then((m) => ({ default: m.BudgetsScreen })));
 
 function ScreenFallback() {
   return (
@@ -64,13 +65,7 @@ export function MainApp() {
             >
               {screen === 'dashboard' && <Dashboard />}
               {screen === 'transactions' && <TransactionsScreen />}
-              {screen === 'budgets' && (
-                <ComingSoon
-                  title="Orçamentos"
-                  emoji="🎯"
-                  description="Defina limites por categoria e acompanhe seus gastos em tempo real."
-                />
-              )}
+              {screen === 'budgets' && <BudgetsScreen />}
               {screen === 'more' && <MoreScreen />}
               {screen === 'goals' && <GoalsScreen />}
               {screen === 'reports' && (
