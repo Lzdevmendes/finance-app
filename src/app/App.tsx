@@ -2,6 +2,7 @@ import { lazy, Suspense } from 'react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { FinanceProvider } from './contexts/FinanceContext';
 import { ThemeProvider } from './contexts/ThemeContext';
+import { NavigationProvider } from './contexts/NavigationContext';
 import { AuthScreen } from './screens/auth/AuthScreen';
 
 // Área autenticada carregada sob demanda (mantém recharts/dashboard fora do
@@ -30,9 +31,11 @@ function AppContent() {
   return (
     <FinanceProvider>
       <ThemeProvider>
-        <Suspense fallback={<LoadingScreen />}>
-          <MainApp />
-        </Suspense>
+        <NavigationProvider>
+          <Suspense fallback={<LoadingScreen />}>
+            <MainApp />
+          </Suspense>
+        </NavigationProvider>
       </ThemeProvider>
     </FinanceProvider>
   );
