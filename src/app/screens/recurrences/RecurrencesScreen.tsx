@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, RefreshCw, Check } from 'lucide-react';
-import { useLocalStorage } from '../../hooks/useLocalStorage';
+import { useRecurrences } from '../../hooks/useRecurrences';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { formatMoney } from '../../utils/format';
 import type { RecurringFrequency } from '../../types';
@@ -15,14 +15,11 @@ const FREQ_LABEL: Record<RecurringFrequency, string> = {
 };
 
 // Equivalente mensal para o total previsto.
-const monthlyEquivalent = (r: Recurrence) =>
+const monthlyEquivalent = (r: { value: number; frequency: RecurringFrequency }) =>
   r.frequency === 'monthly' ? r.value : r.frequency === 'weekly' ? (r.value * 52) / 12 : r.value / 12;
 
-const uid = () => `${Date.now().toString(36)}${Math.random().toString(36).slice(2, 7)}`;
-
 export function RecurrencesScreen() {
-  const [items, setItems] = useLocalStorage<Recurrence[]>('recurrences', []);
-  const [paid, setPaid] = useLocalStorage<string[]>('recurrences-paid', []);
+  const { items, save: saveRecurrence, remove: removeRecurrence, togglePaid: toggle } = useRecurrences();
   const [sheetOpen, setSheetOpen] = useState(false);
   const [editing, setEditing] = useState<Recurrence | null>(null);
 
@@ -30,23 +27,18 @@ export function RecurrencesScreen() {
     const d = new Date();
     return `${d.getFullYear()}-${d.getMonth()}`;
   }, []);
-  const paidKey = (id: string) => `${id}:${monthKey}`;
-  const isPaid = (id: string) => paid.includes(paidKey(id));
+  const isPaid = (r: { paidMonths: string[] }) => (r.paidMonths ?? []).includes(monthKey);
 
   const totalMonthly = items.reduce((acc, r) => acc + monthlyEquivalent(r), 0);
-  const pendingCount = items.filter((r) => !isPaid(r.id)).length;
-
-  const togglePaid = (id: string) =>
-    setPaid((prev) => (prev.includes(paidKey(id)) ? prev.filter((k) => k !== paidKey(id)) : [...prev, paidKey(id)]));
+  const pendingCount = items.filter((r) => !isPaid(r)).length;
 
   const save = (data: Omit<Recurrence, 'id'>, id?: string) => {
-    setItems((prev) => (id ? prev.map((r) => (r.id === id ? { ...r, ...data } : r)) : [...prev, { ...data, id: uid() }]));
+    saveRecurrence(data, id);
     setSheetOpen(false);
     setEditing(null);
   };
   const remove = (id: string) => {
-    setItems((prev) => prev.filter((r) => r.id !== id));
-    setPaid((prev) => prev.filter((k) => !k.startsWith(`${id}:`)));
+    removeRecurrence(id);
     setSheetOpen(false);
     setEditing(null);
   };
@@ -100,7 +92,7 @@ export function RecurrencesScreen() {
 
       <div className="space-y-2.5">
         {items.map((r) => {
-          const done = isPaid(r.id);
+          const done = isPaid(r);
           return (
             <div
               key={r.id}
@@ -125,7 +117,7 @@ export function RecurrencesScreen() {
                 <div className="font-bold text-[14px] tnum">{formatMoney(r.value)}</div>
               </div>
               <button
-                onClick={() => togglePaid(r.id)}
+                onClick={() => toggle(r.id, monthKey)}
                 aria-label={done ? 'Marcar como pendente' : 'Marcar como pago'}
                 className="w-9 h-9 flex-none rounded-full flex items-center justify-center border transition-colors"
                 style={

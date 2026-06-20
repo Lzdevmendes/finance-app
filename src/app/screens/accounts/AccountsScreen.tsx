@@ -2,13 +2,11 @@ import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Landmark, PiggyBank, CreditCard, Pencil, type LucideIcon } from 'lucide-react';
 import { useFinance } from '../../contexts/FinanceContext';
-import { useLocalStorage } from '../../hooks/useLocalStorage';
+import { useAccountInitials } from '../../hooks/useAccountInitials';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { formatMoney } from '../../utils/format';
 import { AccountType, TransactionType } from '../../types';
 import { AccountBalanceSheet } from './AccountBalanceSheet';
-
-type InitialBalances = Partial<Record<AccountType, number>>;
 
 const ACCOUNTS: { type: AccountType; label: string; icon: LucideIcon }[] = [
   { type: AccountType.CHECKING, label: 'Conta Corrente', icon: Landmark },
@@ -17,7 +15,7 @@ const ACCOUNTS: { type: AccountType; label: string; icon: LucideIcon }[] = [
 
 export function AccountsScreen() {
   const { transactions } = useFinance();
-  const [initials, setInitials] = useLocalStorage<InitialBalances>('account-initials', {});
+  const { initials, setInitial } = useAccountInitials();
   const [editing, setEditing] = useState<{ type: AccountType; label: string } | null>(null);
 
   // Movimento (income − expense) por conta, todas as transações.
@@ -146,7 +144,7 @@ export function AccountsScreen() {
         initial={editing ? initials[editing.type] ?? 0 : 0}
         onClose={() => setEditing(null)}
         onSave={(value) => {
-          if (editing) setInitials((prev) => ({ ...prev, [editing.type]: value }));
+          if (editing) setInitial(editing.type, value);
           setEditing(null);
         }}
       />

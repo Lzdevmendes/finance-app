@@ -2,14 +2,12 @@ import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Plus, PieChart } from 'lucide-react';
 import { useFinance } from '../../contexts/FinanceContext';
-import { useLocalStorage } from '../../hooks/useLocalStorage';
+import { useBudgets } from '../../hooks/useBudgets';
 import { ScreenHeader } from '../../components/ScreenHeader';
 import { categories } from '../../constants/ui';
 import { formatMoney } from '../../utils/format';
 import { TransactionType } from '../../types';
 import { BudgetSheet } from './BudgetSheet';
-
-type Budgets = Record<string, number>;
 
 const catInfo = (v: string) => categories.find((c) => c.value === v);
 
@@ -22,7 +20,7 @@ function barColor(ratio: number): string {
 
 export function BudgetsScreen() {
   const { transactions } = useFinance();
-  const [budgets, setBudgets] = useLocalStorage<Budgets>('budgets', {});
+  const { budgets, setBudget, removeBudget } = useBudgets();
   const [sheetCategory, setSheetCategory] = useState<string | null>(null);
   const [adding, setAdding] = useState(false);
 
@@ -79,17 +77,13 @@ export function BudgetsScreen() {
 
   const availableToAdd = categories.filter((c) => budgets[c.value] == null);
 
-  const saveBudget = (category: string, limit: number) => {
-    setBudgets((prev) => ({ ...prev, [category]: limit }));
+  const handleSaveBudget = (category: string, limit: number) => {
+    setBudget(category, limit);
     setSheetCategory(null);
     setAdding(false);
   };
-  const removeBudget = (category: string) => {
-    setBudgets((prev) => {
-      const next = { ...prev };
-      delete next[category];
-      return next;
-    });
+  const handleRemoveBudget = (category: string) => {
+    removeBudget(category);
     setSheetCategory(null);
   };
 
@@ -197,8 +191,8 @@ export function BudgetsScreen() {
           setSheetCategory(null);
           setAdding(false);
         }}
-        onSave={saveBudget}
-        onRemove={removeBudget}
+        onSave={handleSaveBudget}
+        onRemove={handleRemoveBudget}
       />
     </motion.div>
   );

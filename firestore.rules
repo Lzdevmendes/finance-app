@@ -52,5 +52,46 @@ service cloud.firestore {
         && request.resource.data.currentAmount is number
         && request.resource.data.currentAmount >= 0;
     }
+
+    // Orçamentos — limite por categoria (doc id = categoria)
+    match /users/{userId}/budgets/{category} {
+      allow read: if isOwner(userId);
+      allow delete: if isOwner(userId);
+      allow create, update: if isOwner(userId)
+        && request.resource.data.userId == userId
+        && request.resource.data.category is string
+        && request.resource.data.limit is number
+        && request.resource.data.limit > 0
+        && request.resource.data.limit < 1000000000;
+    }
+
+    // Contas — saldo inicial por conta (doc id = tipo da conta)
+    match /users/{userId}/accounts/{accountId} {
+      allow read: if isOwner(userId);
+      allow delete: if isOwner(userId);
+      allow create, update: if isOwner(userId)
+        && request.resource.data.userId == userId
+        && request.resource.data.type in ['checking', 'savings', 'credit_card']
+        && request.resource.data.initialBalance is number;
+    }
+
+    // Recorrências — contas fixas / assinaturas
+    match /users/{userId}/recurrences/{recurrenceId} {
+      allow read: if isOwner(userId);
+      allow delete: if isOwner(userId);
+      allow create, update: if isOwner(userId)
+        && request.resource.data.userId == userId
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.name.size() <= 60
+        && request.resource.data.value is number
+        && request.resource.data.value > 0
+        && request.resource.data.value < 1000000000
+        && request.resource.data.frequency in ['monthly', 'weekly', 'yearly']
+        && request.resource.data.dueDay is number
+        && request.resource.data.dueDay >= 1
+        && request.resource.data.dueDay <= 31
+        && request.resource.data.paidMonths is list;
+    }
   }
 }
