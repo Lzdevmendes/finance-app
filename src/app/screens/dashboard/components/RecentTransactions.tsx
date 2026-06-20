@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
 import { CategoryIcon } from '../../../components/CategoryIcon';
 import { dashboardCategories as categories } from './constants';
+import { formatMoney } from '../../../utils/format';
 import { Transaction } from '../../../types';
 
 interface RecentTransactionsProps {
@@ -8,58 +9,56 @@ interface RecentTransactionsProps {
   darkMode: boolean;
 }
 
-export function RecentTransactions({ transactions, darkMode }: RecentTransactionsProps) {
+export function RecentTransactions({ transactions }: RecentTransactionsProps) {
   return (
-      <div className="space-y-3">
-        <div className="flex justify-between items-center px-1">
-          <h4 className="font-bold">Transações Recentes</h4>
-        </div>
-        {transactions.slice(0, 5).map((t, index) => (
+    <div className="space-y-2.5">
+      <h4 className="font-bold text-[15px] px-1">Transações recentes</h4>
+
+      {transactions.slice(0, 5).map((t, index) => {
+        const income = t.type === 'income';
+        return (
           <motion.div
             key={t.id}
-            initial={{ opacity: 0, x: -20 }}
+            initial={{ opacity: 0, x: -16 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.1, duration: 0.4 }}
-            className={`${
-              darkMode ? 'bg-gray-800' : 'bg-white'
-            } p-4 rounded-2xl flex items-center justify-between shadow-sm border will-change-transform ${
-              darkMode ? 'border-gray-700' : 'border-gray-100'
-            }`}
+            transition={{ delay: index * 0.06, duration: 0.35 }}
+            className="p-3.5 rounded-[16px] flex items-center justify-between border will-change-transform"
+            style={{ background: 'var(--surface)', borderColor: 'var(--line)' }}
           >
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 min-w-0">
               <div
-                className={`p-3 rounded-xl ${
-                  t.type === 'income'
-                    ? 'bg-emerald-100 text-emerald-600'
-                    : 'bg-rose-100 text-rose-600'
-                }`}
+                className="w-[42px] h-[42px] flex-none rounded-[13px] flex items-center justify-center"
+                style={{
+                  background: income ? 'rgba(111,215,163,.13)' : 'rgba(232,137,107,.13)',
+                  color: income ? 'var(--income)' : 'var(--expense)',
+                }}
               >
                 <CategoryIcon category={t.category} />
               </div>
-              <div>
-                <p className="font-bold text-sm">{t.description}</p>
-                <p className="text-xs opacity-50">
+              <div className="min-w-0">
+                <p className="font-bold text-[14px] truncate">{t.description}</p>
+                <p className="text-[12px] mt-0.5 truncate" style={{ color: 'var(--faint)' }}>
                   {categories.find((c) => c.value === t.category)?.label} •{' '}
-                  {new Date(t.date).toLocaleDateString('pt-PT')}
+                  {new Date(t.date).toLocaleDateString('pt-BR')}
                 </p>
               </div>
             </div>
             <span
-              className={`font-bold ${
-                t.type === 'income' ? 'text-emerald-500' : 'text-rose-500'
-              }`}
+              className="font-bold text-[14px] tnum flex-none"
+              style={{ color: income ? 'var(--income)' : 'var(--expense)' }}
             >
-              {t.type === 'income' ? '+' : '-'} R$
-              {t.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+              {income ? '+' : '-'} {formatMoney(t.value)}
             </span>
           </motion.div>
-        ))}
-        {transactions.length === 0 && (
-          <div className="text-center py-12 opacity-50">
-            <p>Nenhuma transação ainda</p>
-            <p className="text-sm">Clique no + para adicionar</p>
-          </div>
-        )}
-      </div>
+        );
+      })}
+
+      {transactions.length === 0 && (
+        <div className="text-center py-12" style={{ color: 'var(--faint)' }}>
+          <p className="text-[14px]">Nenhuma transação ainda</p>
+          <p className="text-[12.5px] mt-0.5">Toque no + para adicionar</p>
+        </div>
+      )}
+    </div>
   );
 }

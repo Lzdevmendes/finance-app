@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction } from 'react';
-import { ArrowUpCircle, ArrowDownCircle } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { formatMoney, formatAmount0 } from '../../../utils/format';
 
 interface Stats {
   balance: number;
@@ -23,94 +24,101 @@ interface BalanceCardProps {
   availableYears: number[];
 }
 
-export function BalanceCard({ stats, selectedMonth, setSelectedMonth, selectedYear, setSelectedYear, monthNames, availableYears }: BalanceCardProps) {
-  return (
-      <div
-        className="bg-gradient-to-br theme-gradient p-6 rounded-[2rem] text-white shadow-xl space-y-4"
-      >
-        <div className="flex justify-between items-center">
-          <div>
-            <span className="text-sm opacity-90">Saldo do Mês</span>
-            <h3 className="text-3xl font-bold mt-1">
-              R$ {stats.balance.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </h3>
-          </div>
-          <div className="flex gap-2 mr-4">
-            <select
-              value={selectedMonth}
-              onChange={(e) => setSelectedMonth(Number(e.target.value))}
-              className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl px-3 py-2 text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-white/50"
-            >
-              {monthNames.map((month, index) => (
-                <option key={index + 1} value={index + 1} className="text-gray-900">
-                  {month}
-                </option>
-              ))}
-            </select>
-            <select
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(Number(e.target.value))}
-              className="bg-white/20 backdrop-blur-sm border border-white/30 rounded-xl px-3 py-2 text-white text-sm font-medium focus:outline-none focus:ring-2 focus:ring-white/50"
-            >
-              {availableYears.map((year) => (
-                <option key={year} value={year} className="text-gray-900">
-                  {year}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-        <div className="grid grid-cols-2 gap-4 pt-2">
-          <div className="bg-white/20 backdrop-blur-sm p-4 rounded-2xl">
-            <div className="flex items-center gap-2 mb-2">
-              <ArrowUpCircle size={18} />
-              <span className="text-xs opacity-90">Receitas</span>
-            </div>
-            <span className="font-bold text-lg">
-              R$ {stats.totalIncome.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </span>
-            <div className="text-xs opacity-75 mt-1">
-              {stats.incomeCount} transações
-            </div>
-          </div>
-          <div className="bg-white/20 backdrop-blur-sm p-4 rounded-2xl">
-            <div className="flex items-center gap-2 mb-2">
-              <ArrowDownCircle size={18} />
-              <span className="text-xs opacity-90">Despesas</span>
-            </div>
-            <span className="font-bold text-lg">
-              R$ {stats.totalExpenses.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
-            </span>
-            <div className="text-xs opacity-75 mt-1">
-              {stats.expenseCount} transações
-            </div>
-          </div>
-        </div>
+const selectClass =
+  'bg-white/15 border border-white/25 rounded-xl px-2.5 py-1.5 text-[13px] font-semibold ' +
+  'focus:outline-none focus:ring-2 focus:ring-white/40';
 
-        {/* Estatísticas Premium */}
-        <div className="grid grid-cols-3 gap-3 pt-2">
-          <div className="bg-white/10 backdrop-blur-sm p-3 rounded-xl text-center">
-            <div className="text-xs opacity-80 mb-1">Total</div>
-            <div className="font-bold text-sm">
-              {stats.transactionCount}
-            </div>
-            <div className="text-xs opacity-60">Transações</div>
-          </div>
-          <div className="bg-white/10 backdrop-blur-sm p-3 rounded-xl text-center">
-            <div className="text-xs opacity-80 mb-1">Média</div>
-            <div className="font-bold text-sm">
-              R$ {stats.averageTransaction.toLocaleString('pt-BR', { minimumFractionDigits: 0 })}
-            </div>
-            <div className="text-xs opacity-60">por transação</div>
-          </div>
-          <div className="bg-white/10 backdrop-blur-sm p-3 rounded-xl text-center">
-            <div className="text-xs opacity-80 mb-1">Maior</div>
-            <div className="font-bold text-sm">
-              R$ {Math.max(stats.largestIncome, stats.largestExpense).toLocaleString('pt-BR', { minimumFractionDigits: 0 })}
-            </div>
-            <div className="text-xs opacity-60">valor</div>
-          </div>
+export function BalanceCard({
+  stats,
+  selectedMonth,
+  setSelectedMonth,
+  selectedYear,
+  setSelectedYear,
+  monthNames,
+  availableYears,
+}: BalanceCardProps) {
+  return (
+    <div
+      className="p-[22px] rounded-[24px] space-y-4"
+      style={{
+        background: 'var(--theme-gradient)',
+        color: 'var(--accent-on)',
+        boxShadow: '0 18px 40px -16px var(--accent)',
+      }}
+    >
+      <div className="flex justify-between items-start">
+        <div className="min-w-0">
+          <span className="text-[13px] opacity-85">Saldo do mês</span>
+          <h3 className="text-[30px] font-extrabold mt-1 tnum leading-none">
+            {formatMoney(stats.balance)}
+          </h3>
+        </div>
+        <div className="flex gap-2 flex-none">
+          <select
+            value={selectedMonth}
+            onChange={(e) => setSelectedMonth(Number(e.target.value))}
+            className={selectClass}
+            style={{ color: 'var(--accent-on)' }}
+          >
+            {monthNames.map((month, index) => (
+              <option key={index + 1} value={index + 1} className="text-gray-900">
+                {month}
+              </option>
+            ))}
+          </select>
+          <select
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(Number(e.target.value))}
+            className={selectClass}
+            style={{ color: 'var(--accent-on)' }}
+          >
+            {availableYears.map((year) => (
+              <option key={year} value={year} className="text-gray-900">
+                {year}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
+
+      <div className="grid grid-cols-2 gap-3">
+        <div className="bg-white/15 p-3.5 rounded-[16px]">
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <ArrowUpRight size={16} strokeWidth={2.4} />
+            <span className="text-[12px] opacity-85">Receitas</span>
+          </div>
+          <span className="font-bold text-[17px] tnum">{formatMoney(stats.totalIncome)}</span>
+          <div className="text-[11.5px] opacity-70 mt-0.5">{stats.incomeCount} transações</div>
+        </div>
+        <div className="bg-white/15 p-3.5 rounded-[16px]">
+          <div className="flex items-center gap-1.5 mb-1.5">
+            <ArrowDownRight size={16} strokeWidth={2.4} />
+            <span className="text-[12px] opacity-85">Despesas</span>
+          </div>
+          <span className="font-bold text-[17px] tnum">{formatMoney(stats.totalExpenses)}</span>
+          <div className="text-[11.5px] opacity-70 mt-0.5">{stats.expenseCount} transações</div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-2.5">
+        <Mini label="Transações" value={String(stats.transactionCount)} caption="no total" />
+        <Mini label="Média" value={formatMoney(stats.averageTransaction)} caption="por lançamento" />
+        <Mini
+          label="Maior"
+          value={`R$ ${formatAmount0(Math.max(stats.largestIncome, stats.largestExpense))}`}
+          caption="valor"
+        />
+      </div>
+    </div>
+  );
+}
+
+function Mini({ label, value, caption }: { label: string; value: string; caption: string }) {
+  return (
+    <div className="bg-white/10 p-2.5 rounded-[13px] text-center">
+      <div className="text-[11px] opacity-75 mb-0.5">{label}</div>
+      <div className="font-bold text-[13px] tnum truncate">{value}</div>
+      <div className="text-[10.5px] opacity-60">{caption}</div>
+    </div>
   );
 }
