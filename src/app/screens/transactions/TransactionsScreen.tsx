@@ -7,6 +7,7 @@ import { Transaction } from '../../types';
 import { logError } from '../../utils/logger';
 import { TransactionFilters } from './components/TransactionFilters';
 import { TransactionItem } from './components/TransactionItem';
+import { TransactionCalendar } from './components/TransactionCalendar';
 import { EditTransactionModal, type EditingTransaction } from './components/EditTransactionModal';
 
 export function TransactionsScreen() {
@@ -18,6 +19,7 @@ export function TransactionsScreen() {
   const [filterAccount, setFilterAccount] = useState('all');
   const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const [showFilters, setShowFilters] = useState(false);
+  const [viewMode, setViewMode] = useState<'list' | 'calendar'>('list');
   const [editingTransaction, setEditingTransaction] = useState<EditingTransaction | null>(null);
   const [showEditModal, setShowEditModal] = useState(false);
   const [editLoading, setEditLoading] = useState(false);
@@ -189,7 +191,39 @@ export function TransactionsScreen() {
         })}
       </div>
 
-      {/* Grouped Transactions */}
+      {/* Toggle Lista / Calendário */}
+      <div className="flex gap-1 p-1 rounded-[14px]" style={{ background: 'var(--surface2)' }}>
+        {([
+          { mode: 'list', label: 'Lista' },
+          { mode: 'calendar', label: 'Calendário' },
+        ] as const).map((opt) => {
+          const active = viewMode === opt.mode;
+          return (
+            <button
+              key={opt.mode}
+              onClick={() => setViewMode(opt.mode)}
+              className="flex-1 py-2 rounded-[11px] text-[13px] font-semibold transition-all"
+              style={
+                active
+                  ? { background: 'var(--surface)', color: 'var(--accent)', boxShadow: '0 2px 8px -2px rgba(0,0,0,.15)' }
+                  : { color: 'var(--faint)' }
+              }
+            >
+              {opt.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {viewMode === 'calendar' ? (
+        <TransactionCalendar
+          transactions={filteredTransactions}
+          darkMode={darkMode}
+          onEdit={handleEditTransaction}
+          onDelete={deleteTransaction}
+        />
+      ) : (
+      /* Grouped Transactions */
       <div className="space-y-5">
         {Object.entries(groupedTransactions).map(([date, txs]) => (
           <div key={date} className="space-y-2">
@@ -213,6 +247,7 @@ export function TransactionsScreen() {
           </div>
         )}
       </div>
+      )}
 
       <EditTransactionModal
         show={showEditModal}
