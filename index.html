@@ -15,65 +15,17 @@
     <title>Finanças Pro</title>
 
     <script>
-      // Theme initialization script - runs before React loads
-      (function() {
+      // Aplica tema antes do React carregar (evita flash). As cores vivem em CSS:
+      // o modo é a classe .dark e o accent é o atributo data-accent no <html>.
+      (function () {
         try {
-          // Get user preferences from localStorage
-          const userPrefs = localStorage.getItem('finance-app-preferences');
-          let theme = 'emerald';
-          let darkMode = false;
-
-          if (userPrefs) {
-            const prefs = JSON.parse(userPrefs);
-            theme = prefs.theme || 'emerald';
-            darkMode = prefs.darkMode || false;
-          }
-
-          // Apply dark mode class immediately
-          if (darkMode) {
-            document.documentElement.classList.add('dark');
-          }
-
-          // Apply theme colors immediately using CSS custom properties
-          const themeColors = {
-            emerald: {
-              primary: '#10b981',
-              primaryHover: '#059669',
-              light: '#ecfdf5',
-              gradient: 'linear-gradient(135deg, #10b981 0%, #059669 100%)'
-            },
-            blue: {
-              primary: '#3b82f6',
-              primaryHover: '#2563eb',
-              light: '#eff6ff',
-              gradient: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'
-            },
-            purple: {
-              primary: '#8b5cf6',
-              primaryHover: '#7c3aed',
-              light: '#faf5ff',
-              gradient: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)'
-            },
-            rose: {
-              primary: '#f43f5e',
-              primaryHover: '#e11d48',
-              light: '#fff1f2',
-              gradient: 'linear-gradient(135deg, #f43f5e 0%, #e11d48 100%)'
-            }
-          };
-
-          const colors = themeColors[theme];
-          if (colors) {
-            // Apply theme colors to CSS custom properties
-            document.documentElement.style.setProperty('--theme-primary', colors.primary);
-            document.documentElement.style.setProperty('--theme-primary-hover', colors.primaryHover);
-            document.documentElement.style.setProperty('--theme-light', colors.light);
-            document.documentElement.style.setProperty('--theme-gradient', colors.gradient);
-          }
-
-          // Store theme info for React to use
-          window.__THEME_DATA__ = { theme, darkMode };
-
+          var prefs = JSON.parse(localStorage.getItem('finance-app-preferences') || '{}');
+          var theme = prefs.theme || 'emerald';
+          var darkMode = prefs.darkMode || false;
+          var root = document.documentElement;
+          root.classList.toggle('dark', darkMode);
+          root.setAttribute('data-accent', theme);
+          window.__THEME_DATA__ = { theme: theme, darkMode: darkMode };
         } catch (error) {
           console.warn('Theme initialization failed:', error);
         }
