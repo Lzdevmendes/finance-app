@@ -21,6 +21,7 @@ const GoalsScreen = lazy(() => import('./goals/GoalsScreen').then((m) => ({ defa
 const SettingsScreen = lazy(() => import('./settings/SettingsScreen').then((m) => ({ default: m.SettingsScreen })));
 const BudgetsScreen = lazy(() => import('./budgets/BudgetsScreen').then((m) => ({ default: m.BudgetsScreen })));
 const ReportsScreen = lazy(() => import('./reports/ReportsScreen').then((m) => ({ default: m.ReportsScreen })));
+const AccountsScreen = lazy(() => import('./accounts/AccountsScreen').then((m) => ({ default: m.AccountsScreen })));
 
 function ScreenFallback() {
   return (
@@ -70,14 +71,7 @@ export function MainApp() {
               {screen === 'more' && <MoreScreen />}
               {screen === 'goals' && <GoalsScreen />}
               {screen === 'reports' && <ReportsScreen />}
-              {screen === 'accounts' && (
-                <ComingSoon
-                  title="Contas & Cartões"
-                  emoji="💳"
-                  description="Saldos das contas e o controle da fatura do seu cartão."
-                  back="more"
-                />
-              )}
+              {screen === 'accounts' && <AccountsScreen />}
               {screen === 'recurrences' && (
                 <ComingSoon
                   title="Recorrências"
