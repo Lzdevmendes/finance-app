@@ -6,6 +6,11 @@ import { TransactionModal } from '../components/modals/TransactionModal';
 import { BottomNav } from '../components/BottomNav';
 import { MoreScreen } from './more/MoreScreen';
 import { ComingSoon } from '../components/ComingSoon';
+import { OnboardingScreen } from './onboarding/OnboardingScreen';
+
+// Onboarding aparece p/ usuário sem transações; ao concluir/pular grava um flag
+// local (sem novo schema no Firestore) p/ não repetir nem piscar no reload.
+const ONBOARDED_KEY = 'finance-app-onboarded';
 
 // Cada tela pesada carregada sob demanda (a do dashboard puxa o chunk do recharts).
 const Dashboard = lazy(() => import('./dashboard/Dashboard').then((m) => ({ default: m.Dashboard })));
@@ -27,9 +32,23 @@ function ScreenFallback() {
 }
 
 export function MainApp() {
-  const { preferences } = useFinance();
+  const { preferences, transactions, loading } = useFinance();
   const { screen } = useNavigation();
   const [showAddModal, setShowAddModal] = useState(false);
+  const [onboardDismissed, setOnboardDismissed] = useState(
+    () => localStorage.getItem(ONBOARDED_KEY) === '1',
+  );
+
+  const showOnboarding = !loading && !onboardDismissed && transactions.length === 0;
+
+  const dismissOnboarding = () => {
+    localStorage.setItem(ONBOARDED_KEY, '1');
+    setOnboardDismissed(true);
+  };
+
+  if (showOnboarding) {
+    return <OnboardingScreen onDone={dismissOnboarding} />;
+  }
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)', color: 'var(--text)' }}>
