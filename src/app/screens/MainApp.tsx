@@ -5,7 +5,6 @@ import { useFinance } from '../contexts/FinanceContext';
 import { TransactionModal } from '../components/modals/TransactionModal';
 import { BottomNav } from '../components/BottomNav';
 import { MoreScreen } from './more/MoreScreen';
-import { ComingSoon } from '../components/ComingSoon';
 import { OnboardingScreen } from './onboarding/OnboardingScreen';
 
 // Onboarding aparece p/ usuário sem transações; ao concluir/pular grava um flag
@@ -22,6 +21,7 @@ const SettingsScreen = lazy(() => import('./settings/SettingsScreen').then((m) =
 const BudgetsScreen = lazy(() => import('./budgets/BudgetsScreen').then((m) => ({ default: m.BudgetsScreen })));
 const ReportsScreen = lazy(() => import('./reports/ReportsScreen').then((m) => ({ default: m.ReportsScreen })));
 const AccountsScreen = lazy(() => import('./accounts/AccountsScreen').then((m) => ({ default: m.AccountsScreen })));
+const RecurrencesScreen = lazy(() => import('./recurrences/RecurrencesScreen').then((m) => ({ default: m.RecurrencesScreen })));
 
 function ScreenFallback() {
   return (
@@ -72,14 +72,7 @@ export function MainApp() {
               {screen === 'goals' && <GoalsScreen />}
               {screen === 'reports' && <ReportsScreen />}
               {screen === 'accounts' && <AccountsScreen />}
-              {screen === 'recurrences' && (
-                <ComingSoon
-                  title="Recorrências"
-                  emoji="🔁"
-                  description="Suas contas fixas e assinaturas, com status de pagamento."
-                  back="more"
-                />
-              )}
+              {screen === 'recurrences' && <RecurrencesScreen />}
               {screen === 'settings' && <SettingsScreen />}
             </motion.div>
           </AnimatePresence>
