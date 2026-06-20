@@ -1,6 +1,7 @@
 import { motion } from 'framer-motion';
-import { Edit, Trash2 } from 'lucide-react';
+import { Pencil, Trash2 } from 'lucide-react';
 import { CategoryIcon } from '../../../components/CategoryIcon';
+import { formatMoney } from '../../../utils/format';
 import { Transaction } from '../../../types';
 
 interface TransactionItemProps {
@@ -10,63 +11,62 @@ interface TransactionItemProps {
   onDelete: (id: string) => void;
 }
 
-export function TransactionItem({ transaction: t, darkMode, onEdit, onDelete }: TransactionItemProps) {
+export function TransactionItem({ transaction: t, onEdit, onDelete }: TransactionItemProps) {
+  const income = t.type === 'income';
   return (
     <motion.div
-      initial={{ opacity: 0, x: -20 }}
+      initial={{ opacity: 0, x: -16 }}
       animate={{ opacity: 1, x: 0 }}
-      className={`${
-        darkMode ? 'bg-gray-800' : 'bg-white'
-      } p-4 rounded-2xl flex items-center justify-between shadow-sm border ${
-        darkMode ? 'border-gray-700' : 'border-gray-100'
-      }`}
+      className="p-3.5 rounded-[16px] flex items-center justify-between border"
+      style={{ background: 'var(--surface)', borderColor: 'var(--line)' }}
     >
-      <div className="flex items-center gap-3 flex-1">
+      <div className="flex items-center gap-3 flex-1 min-w-0">
         <div
-          className={`p-3 rounded-xl ${
-            t.type === 'income'
-              ? 'bg-emerald-100 text-emerald-600'
-              : 'bg-rose-100 text-rose-600'
-          }`}
+          className="w-[42px] h-[42px] flex-none rounded-[13px] flex items-center justify-center"
+          style={{
+            background: income ? 'rgba(111,215,163,.13)' : 'rgba(232,137,107,.13)',
+            color: income ? 'var(--income)' : 'var(--expense)',
+          }}
         >
           <CategoryIcon category={t.category} />
         </div>
-        <div className="flex-1">
-          <p className="font-bold text-sm">{t.description}</p>
-          <div className="flex flex-wrap gap-1 mt-1">
-            {t.tags.map((tag, i) => (
-              <span
-                key={i}
-                className={`text-xs px-2 py-0.5 rounded-full ${
-                  darkMode
-                    ? 'bg-gray-700 text-gray-300'
-                    : 'bg-gray-100 text-gray-600'
-                }`}
-              >
-                {tag}
-              </span>
-            ))}
-          </div>
+        <div className="flex-1 min-w-0">
+          <p className="font-bold text-[14px] truncate">{t.description}</p>
+          {t.tags.length > 0 && (
+            <div className="flex flex-wrap gap-1 mt-1">
+              {t.tags.map((tag, i) => (
+                <span
+                  key={i}
+                  className="text-[11px] px-2 py-0.5 rounded-full"
+                  style={{ background: 'var(--surface2)', color: 'var(--muted)' }}
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
         </div>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-2 flex-none">
         <div className="text-right">
           <span
-            className={`font-bold block ${
-              t.type === 'income' ? 'text-emerald-500' : 'text-rose-500'
-            }`}
+            className="font-bold text-[14px] tnum block"
+            style={{ color: income ? 'var(--income)' : 'var(--expense)' }}
           >
-            {t.type === 'income' ? '+' : '-'} R$
-            {t.value.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
+            {income ? '+' : '-'} {formatMoney(t.value)}
           </span>
-          <span className="text-xs opacity-50">{t.account}</span>
+          <span className="text-[11.5px]" style={{ color: 'var(--faint)' }}>
+            {t.account}
+          </span>
         </div>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center">
           <button
             onClick={() => onEdit(t)}
-            className="text-gray-400 hover:text-blue-500 p-2 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-all duration-200 will-change-transform"
+            aria-label="Editar"
+            className="p-2 rounded-[10px]"
+            style={{ color: 'var(--faint)' }}
           >
-            <Edit size={18} />
+            <Pencil size={17} strokeWidth={2} />
           </button>
           <button
             onClick={() => {
@@ -74,9 +74,11 @@ export function TransactionItem({ transaction: t, darkMode, onEdit, onDelete }: 
                 onDelete(t.id);
               }
             }}
-            className="text-gray-400 hover:text-rose-500 p-2 rounded-lg hover:bg-rose-50 dark:hover:bg-rose-900/20 transition-all duration-200 will-change-transform"
+            aria-label="Excluir"
+            className="p-2 rounded-[10px]"
+            style={{ color: 'var(--faint)' }}
           >
-            <Trash2 size={18} />
+            <Trash2 size={17} strokeWidth={2} />
           </button>
         </div>
       </div>
