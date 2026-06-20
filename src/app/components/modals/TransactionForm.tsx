@@ -13,6 +13,11 @@ const todayString = () => {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
 };
 
+const fieldClass = 'w-full p-3.5 rounded-[14px] border outline-none transition-all focus:ring-2';
+const fieldStyle = { background: 'var(--surface2)', borderColor: 'var(--line)', color: 'var(--text)' };
+const labelClass = 'block text-[13px] font-medium mb-2';
+const labelStyle = { color: 'var(--muted)' };
+
 export function TransactionForm({ darkMode, onClose }: { darkMode: boolean; onClose: () => void }) {
   const { addTransaction, transactions } = useFinance();
   const [type, setType] = useState<TransactionType>(TransactionType.EXPENSE);
@@ -119,63 +124,52 @@ export function TransactionForm({ darkMode, onClose }: { darkMode: boolean; onCl
   return (
     <>
       {error && (
-        <div className="mx-6 mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
-          <p className="text-red-600 dark:text-red-400 text-sm font-medium">{error}</p>
+        <div
+          className="mx-6 mt-4 p-3 rounded-[12px] border"
+          style={{ background: 'rgba(207,91,63,.1)', borderColor: 'rgba(207,91,63,.3)' }}
+        >
+          <p className="text-[13px] font-medium" style={{ color: 'var(--expense)' }}>{error}</p>
         </div>
       )}
-      <motion.form
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.3, duration: 0.4 }}
-        onSubmit={handleSubmit}
-        className="p-6 space-y-4"
-      >
-        <motion.div
-          initial={{ opacity: 0, scale: 0.95 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.4, duration: 0.4 }}
-          className="grid grid-cols-2 gap-3 p-1 bg-gray-100 dark:bg-gray-700 rounded-2xl"
+      <form onSubmit={handleSubmit} className="p-6 space-y-4">
+        <div
+          className="grid grid-cols-2 gap-2 p-1 rounded-[16px]"
+          style={{ background: 'var(--surface2)' }}
         >
-          <button
-            type="button"
-            onClick={() => setType(TransactionType.INCOME)}
-            className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all ${
-              type === 'income'
-                ? 'bg-white dark:bg-gray-600 text-emerald-600 shadow-sm'
-                : 'text-gray-500'
-            }`}
-          >
-            <ArrowUpCircle size={18} />
-            Receita
-          </button>
-          <button
-            type="button"
-            onClick={() => setType(TransactionType.EXPENSE)}
-            className={`flex items-center justify-center gap-2 py-3 rounded-xl font-bold text-sm transition-all ${
-              type === 'expense'
-                ? 'bg-white dark:bg-gray-600 text-rose-600 shadow-sm'
-                : 'text-gray-500'
-            }`}
-          >
-            <ArrowDownCircle size={18} />
-            Despesa
-          </button>
-        </motion.div>
+          {[
+            { t: TransactionType.INCOME, label: 'Receita', icon: ArrowUpCircle, color: 'var(--income)' },
+            { t: TransactionType.EXPENSE, label: 'Despesa', icon: ArrowDownCircle, color: 'var(--expense)' },
+          ].map((opt) => {
+            const Icon = opt.icon;
+            const active = type === opt.t;
+            return (
+              <button
+                key={opt.t}
+                type="button"
+                onClick={() => setType(opt.t)}
+                className="flex items-center justify-center gap-2 py-2.5 rounded-[12px] font-bold text-[14px] transition-all"
+                style={
+                  active
+                    ? { background: 'var(--surface)', color: opt.color, boxShadow: '0 2px 8px -2px rgba(0,0,0,.15)' }
+                    : { color: 'var(--faint)' }
+                }
+              >
+                <Icon size={18} />
+                {opt.label}
+              </button>
+            );
+          })}
+        </div>
         <div>
-          <label className="block text-sm font-medium mb-2 opacity-70">
-            Descrição
-          </label>
+          <label className={labelClass} style={labelStyle}>Descrição</label>
           <div className="relative">
             <input
               type="text"
               value={description}
               onChange={(e) => handleDescriptionChange(e.target.value)}
               placeholder={type === 'income' ? 'Ex: Salário, Freelance, Dividendos...' : 'Ex: Almoço, Transporte, Compras...'}
-              className={`w-full p-4 rounded-2xl border ${
-                darkMode
-                  ? 'bg-gray-800 border-gray-700 focus:border-gray-600'
-                  : 'bg-gray-50 border-gray-200 focus:border-gray-300'
-              } focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all`}
+              className={fieldClass}
+              style={fieldStyle}
               required
             />
             {/* Suggestions Dropdown */}
@@ -185,22 +179,19 @@ export function TransactionForm({ darkMode, onClose }: { darkMode: boolean; onCl
                   initial={{ opacity: 0, y: -10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -10 }}
-                  className={`absolute top-full left-0 right-0 mt-2 ${
-                    darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-gray-200'
-                  } border rounded-2xl shadow-xl z-10 max-h-40 overflow-y-auto`}
+                  className="absolute top-full left-0 right-0 mt-2 border rounded-[14px] shadow-xl z-10 max-h-40 overflow-y-auto"
+                  style={{ background: 'var(--surface)', borderColor: 'var(--line)' }}
                 >
                   {suggestions.map((suggestion, index) => (
                     <button
                       key={index}
                       type="button"
                       onClick={() => selectSuggestion(suggestion)}
-                      className={`w-full p-3 text-left hover:${
-                        darkMode ? 'bg-gray-700' : 'bg-gray-50'
-                      } transition-colors first:rounded-t-2xl last:rounded-b-2xl`}
+                      className="w-full p-3 text-left transition-colors"
                     >
                       <div className="flex items-center gap-2">
-                        <History size={16} className="opacity-50" />
-                        <span className="font-medium">{suggestion}</span>
+                        <History size={16} style={{ color: 'var(--faint)' }} />
+                        <span className="font-medium text-[14px]">{suggestion}</span>
                       </div>
                     </button>
                   ))}
@@ -210,9 +201,7 @@ export function TransactionForm({ darkMode, onClose }: { darkMode: boolean; onCl
           </div>
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2 opacity-70">
-            Valor
-          </label>
+          <label className={labelClass} style={labelStyle}>Valor</label>
           <CurrencyInput
             value={value}
             onValueChange={(value) => setValue(value || '')}
@@ -221,26 +210,18 @@ export function TransactionForm({ darkMode, onClose }: { darkMode: boolean; onCl
             decimalSeparator=","
             groupSeparator="."
             placeholder="R$ 0,00"
-            className={`w-full p-4 rounded-2xl border ${
-              darkMode
-                ? 'bg-gray-700 border-gray-600'
-                : 'bg-gray-50 border-gray-100'
-            } focus:ring-2 focus:ring-emerald-500 outline-none font-bold text-2xl`}
+            className={`${fieldClass} font-bold text-2xl tnum`}
+            style={fieldStyle}
             required
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2 opacity-70">
-            Categoria
-          </label>
+          <label className={labelClass} style={labelStyle}>Categoria</label>
           <select
             value={category}
             onChange={(e) => setCategory(e.target.value as CategoryType)}
-            className={`w-full p-4 rounded-2xl border ${
-              darkMode
-                ? 'bg-gray-700 border-gray-600'
-                : 'bg-gray-50 border-gray-100'
-            } outline-none`}
+            className={fieldClass}
+            style={fieldStyle}
           >
             {categories.map((cat) => (
               <option key={cat.value} value={cat.value}>
@@ -250,33 +231,23 @@ export function TransactionForm({ darkMode, onClose }: { darkMode: boolean; onCl
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2 opacity-70">
-            Data
-          </label>
+          <label className={labelClass} style={labelStyle}>Data</label>
           <input
             type="date"
             value={date}
             max={todayString()}
             onChange={(e) => setDate(e.target.value)}
-            className={`w-full p-4 rounded-2xl border ${
-              darkMode
-                ? 'bg-gray-700 border-gray-600 text-white'
-                : 'bg-gray-50 border-gray-100 text-gray-900'
-            } outline-none`}
+            className={fieldClass}
+            style={fieldStyle}
           />
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2 opacity-70">
-            Conta
-          </label>
+          <label className={labelClass} style={labelStyle}>Conta</label>
           <select
             value={account}
             onChange={(e) => setAccount(e.target.value as AccountType)}
-            className={`w-full p-4 rounded-2xl border ${
-              darkMode
-                ? 'bg-gray-700 border-gray-600'
-                : 'bg-gray-50 border-gray-100'
-            } outline-none`}
+            className={fieldClass}
+            style={fieldStyle}
           >
             <option value={AccountType.CHECKING}>Conta Corrente</option>
             <option value={AccountType.SAVINGS}>Conta Poupança</option>
@@ -284,9 +255,7 @@ export function TransactionForm({ darkMode, onClose }: { darkMode: boolean; onCl
           </select>
         </div>
         <div>
-          <label className="block text-sm font-medium mb-2 opacity-70">
-            Tags
-          </label>
+          <label className={labelClass} style={labelStyle}>Tags</label>
           <TagInput
             tags={tags}
             onTagsChange={setTags}
@@ -296,11 +265,12 @@ export function TransactionForm({ darkMode, onClose }: { darkMode: boolean; onCl
         </div>
         <button
           type="submit"
-          className="w-full py-4 theme-primary text-white rounded-2xl font-bold shadow-lg mt-6 active:scale-95 transition-all"
+          className="w-full py-3.5 rounded-[16px] font-bold mt-4 active:scale-95 transition-all"
+          style={{ background: 'var(--accent)', color: 'var(--accent-on)' }}
         >
-          Confirmar Lançamento
+          Confirmar lançamento
         </button>
-      </motion.form>
+      </form>
     </>
   );
 }

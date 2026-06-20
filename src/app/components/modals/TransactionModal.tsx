@@ -33,42 +33,28 @@ export function TransactionModal({
             damping: 28,
             stiffness: 300,
           }}
-          className={`absolute bottom-0 left-0 right-0 ${
-            darkMode ? 'bg-gray-800' : 'bg-white'
-          } rounded-t-[2rem] shadow-2xl z-[1001]`}
-          style={{ maxHeight: 'calc(92vh - env(safe-area-inset-top, 0px))' }}
+          className="absolute bottom-0 left-0 right-0 rounded-t-[28px] shadow-2xl z-[1001] border-t"
+          style={{ maxHeight: 'calc(92vh - env(safe-area-inset-top, 0px))', background: 'var(--surface)', borderColor: 'var(--line)' }}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header fixo */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1, duration: 0.4 }}
-            className={`sticky top-0 z-10 p-6 pb-4 border-b border-gray-100 dark:border-gray-700 rounded-t-[3rem] ${
-              darkMode ? 'bg-gray-800' : 'bg-white'
-            }`}
+          <div
+            className="sticky top-0 z-10 p-6 pb-4 border-b rounded-t-[28px]"
+            style={{ background: 'var(--surface)', borderColor: 'var(--line)' }}
           >
-            <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-4 sm:hidden" />
+            <div className="w-12 h-1.5 rounded-full mx-auto mb-4 sm:hidden" style={{ background: 'var(--line)' }} />
             <div className="flex items-center justify-between">
-              <motion.h3
-                initial={{ opacity: 0, x: -20 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: 0.2, duration: 0.4 }}
-                className="text-xl font-bold"
-              >
-                Novo Lançamento
-              </motion.h3>
-              <motion.button
-                initial={{ opacity: 0, scale: 0.8 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: 0.25, duration: 0.3 }}
+              <h3 className="text-[19px] font-bold">Novo lançamento</h3>
+              <button
                 onClick={onClose}
-                className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                aria-label="Fechar"
+                className="w-9 h-9 rounded-full flex items-center justify-center"
+                style={{ background: 'var(--surface2)', color: 'var(--muted)' }}
               >
-                <X size={20} />
-              </motion.button>
+                <X size={18} />
+              </button>
             </div>
-          </motion.div>
+          </div>
 
           {/* Conteúdo com scroll */}
           <div className="overflow-y-auto" style={{ maxHeight: 'calc(92vh - env(safe-area-inset-top, 0px) - 120px)', paddingBottom: 'env(safe-area-inset-bottom, 1rem)' }}>
