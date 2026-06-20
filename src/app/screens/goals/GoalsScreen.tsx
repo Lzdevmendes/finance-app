@@ -1,15 +1,16 @@
 import { useState, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Target, Plus, Edit, Trash2, X } from 'lucide-react';
+import { Target, Plus, Pencil, Trash2, X } from 'lucide-react';
 import CurrencyInput from 'react-currency-input-field';
 import { useFinance } from '../../contexts/FinanceContext';
 import { GoalModal } from '../../components/modals/GoalModal';
-import { themes } from '../../constants/ui';
+import { ScreenHeader } from '../../components/ScreenHeader';
+import { formatMoney } from '../../utils/format';
 import { Goal } from '../../types';
 
 export function GoalsScreen() {
   const { goals, transactions, deleteGoal, updateGoal, preferences } = useFinance();
-  const { theme, darkMode } = preferences;
+  const { theme } = preferences;
   const [showGoalModal, setShowGoalModal] = useState(false);
   const [editingGoal, setEditingGoal] = useState<Goal | null>(null);
   const [showProgressModal, setShowProgressModal] = useState(false);
@@ -60,18 +61,24 @@ export function GoalsScreen() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="space-y-4"
+      className="px-[22px] pb-28 pt-2 space-y-4"
     >
-      <div className="flex items-center justify-between">
-        <h3 className="text-2xl font-bold">Metas</h3>
-        <button
-          onClick={() => setShowGoalModal(true)}
-          className="theme-primary text-white px-4 py-2 rounded-xl font-semibold shadow-lg active:scale-95 transition-all"
-        >
-          Nova Meta
-        </button>
-      </div>
-      <div className="grid gap-4">
+      <ScreenHeader
+        title="Metas"
+        back="more"
+        action={
+          <motion.button
+            whileTap={{ scale: 0.94 }}
+            onClick={() => setShowGoalModal(true)}
+            className="px-3.5 py-2 rounded-[13px] text-[13.5px] font-semibold flex-none"
+            style={{ background: 'var(--accent)', color: 'var(--accent-on)' }}
+          >
+            Nova meta
+          </motion.button>
+        }
+      />
+
+      <div className="grid gap-3">
         {goals.map((goal, index) => {
           const progress = (goal.currentAmount / goal.targetAmount) * 100;
           const remaining = goal.targetAmount - goal.currentAmount;
@@ -80,48 +87,46 @@ export function GoalsScreen() {
           return (
             <motion.div
               key={goal.id}
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1, duration: 0.4 }}
-              className={`${
-                darkMode ? 'bg-gray-800' : 'bg-white'
-              } p-5 rounded-3xl border will-change-transform ${
-                darkMode ? 'border-gray-700' : 'border-gray-100'
-              } shadow-sm`}
+              transition={{ delay: index * 0.06, duration: 0.4 }}
+              className="p-5 rounded-[20px] border will-change-transform"
+              style={{ background: 'var(--surface)', borderColor: 'var(--line)' }}
             >
               <div className="flex justify-between items-start mb-4">
-                <div className="flex items-center gap-3 flex-1">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
                   <div
-                    className={`${themes[theme].light} ${themes[theme].text} p-3 rounded-2xl`}
+                    className="w-[46px] h-[46px] flex-none rounded-[14px] flex items-center justify-center"
+                    style={{ background: 'var(--accent-dim)', color: 'var(--accent)' }}
                   >
-                    <Target size={24} />
+                    <Target size={22} strokeWidth={2} />
                   </div>
-                  <div className="flex-1">
-                    <p className="font-bold text-lg">{goal.name}</p>
-                    <p className="text-sm opacity-50">
-                      Meta: R${' '}
-                      {goal.targetAmount.toLocaleString('pt-BR', {
-                        minimumFractionDigits: 2,
-                      })}
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-[16px] truncate">{goal.name}</p>
+                    <p className="text-[12.5px]" style={{ color: 'var(--faint)' }}>
+                      Meta: {formatMoney(goal.targetAmount)}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="font-semibold text-sm text-emerald-500">
+                <div className="flex items-center gap-0.5 flex-none">
+                  <span className="font-bold text-[13px] tnum mr-1" style={{ color: 'var(--accent)' }}>
                     {progress.toFixed(0)}%
                   </span>
                   <button
                     onClick={() => handleAddProgress(goal)}
-                    className="p-1.5 hover:bg-emerald-100 dark:hover:bg-emerald-900/20 rounded-lg transition-all duration-200 text-emerald-500"
+                    className="p-1.5 rounded-[9px]"
+                    style={{ color: 'var(--accent)' }}
                     title="Adicionar progresso"
                   >
-                    <Plus size={16} />
+                    <Plus size={16} strokeWidth={2.4} />
                   </button>
                   <button
                     onClick={() => handleEdit(goal)}
-                    className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-all duration-200 will-change-transform"
+                    className="p-1.5 rounded-[9px]"
+                    style={{ color: 'var(--faint)' }}
+                    aria-label="Editar"
                   >
-                    <Edit size={18} className="text-gray-600 dark:text-gray-300" />
+                    <Pencil size={16} strokeWidth={2} />
                   </button>
                   <button
                     onClick={() => {
@@ -129,31 +134,31 @@ export function GoalsScreen() {
                         deleteGoal(goal.id);
                       }
                     }}
-                    className="p-2 hover:bg-rose-100 dark:hover:bg-rose-900/20 rounded-lg transition-all duration-200 will-change-transform text-rose-500"
+                    className="p-1.5 rounded-[9px]"
+                    style={{ color: 'var(--faint)' }}
+                    aria-label="Excluir"
                   >
-                    <Trash2 size={18} />
+                    <Trash2 size={16} strokeWidth={2} />
                   </button>
                 </div>
               </div>
-              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-3 overflow-hidden mb-3">
+              <div
+                className="w-full rounded-full h-2.5 overflow-hidden mb-3"
+                style={{ background: 'var(--surface2)' }}
+              >
                 <motion.div
                   initial={{ width: 0 }}
                   animate={{ width: `${Math.min(progress, 100)}%` }}
                   transition={{ duration: 1, ease: 'easeOut' }}
-                  className={`${themes[theme].primary} h-full`}
+                  className="h-full rounded-full"
+                  style={{ background: 'var(--accent)' }}
                 />
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="opacity-70">
-                  Economizado: R${' '}
-                  {goal.currentAmount.toLocaleString('pt-BR', {
-                    minimumFractionDigits: 2,
-                  })}
-                </span>
+              <div className="flex justify-between text-[12.5px]" style={{ color: 'var(--muted)' }}>
+                <span className="tnum">Economizado: {formatMoney(goal.currentAmount)}</span>
                 {remaining > 0 && monthsToGoal > 0 && (
-                  <span className="opacity-70">
-                    Faltam ~{monthsToGoal}{' '}
-                    {monthsToGoal === 1 ? 'mês' : 'meses'}
+                  <span>
+                    Faltam ~{monthsToGoal} {monthsToGoal === 1 ? 'mês' : 'meses'}
                   </span>
                 )}
               </div>
@@ -161,17 +166,23 @@ export function GoalsScreen() {
           );
         })}
         {goals.length === 0 && (
-          <div className="text-center py-12 opacity-50">
-            <Target className="w-16 h-16 mx-auto mb-4" />
-            <p>Nenhuma meta criada</p>
-            <p className="text-sm">Clique em "Nova Meta" para começar</p>
+          <div className="text-center py-14" style={{ color: 'var(--faint)' }}>
+            <div
+              className="w-16 h-16 rounded-[20px] flex items-center justify-center mx-auto mb-4"
+              style={{ background: 'var(--accent-dim)', color: 'var(--accent)' }}
+            >
+              <Target size={28} />
+            </div>
+            <p className="text-[14px] font-semibold" style={{ color: 'var(--text)' }}>
+              Nenhuma meta criada
+            </p>
+            <p className="text-[13px] mt-1">Toque em "Nova meta" para começar</p>
           </div>
         )}
       </div>
       <GoalModal
         show={showGoalModal}
         onClose={handleCloseModal}
-        darkMode={darkMode}
         theme={theme}
         editGoal={editingGoal}
       />
@@ -193,38 +204,51 @@ export function GoalsScreen() {
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
               transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-              className={`absolute bottom-0 left-0 right-0 ${
-                darkMode ? 'bg-gray-800' : 'bg-white'
-              } p-6 rounded-t-[2rem] shadow-2xl z-[1001]`}
-              style={{ paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))' }}
+              className="absolute bottom-0 left-0 right-0 p-6 rounded-t-[28px] shadow-2xl z-[1001] border-t"
+              style={{
+                background: 'var(--surface)',
+                borderColor: 'var(--line)',
+                paddingBottom: 'calc(1.5rem + env(safe-area-inset-bottom, 0px))',
+              }}
               onClick={(e) => e.stopPropagation()}
             >
-              <div className="w-12 h-1.5 bg-gray-200 dark:bg-gray-700 rounded-full mx-auto mb-4" />
+              <div
+                className="w-12 h-1.5 rounded-full mx-auto mb-4"
+                style={{ background: 'var(--line)' }}
+              />
               <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h3 className="text-lg font-bold">Adicionar Progresso</h3>
-                  <p className="text-sm opacity-70">{progressGoal.name}</p>
+                <div className="min-w-0">
+                  <h3 className="text-[18px] font-bold">Adicionar progresso</h3>
+                  <p className="text-[13px] truncate" style={{ color: 'var(--muted)' }}>
+                    {progressGoal.name}
+                  </p>
                 </div>
                 <button
                   onClick={() => setShowProgressModal(false)}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                  aria-label="Fechar"
+                  className="w-9 h-9 rounded-full flex items-center justify-center flex-none"
+                  style={{ background: 'var(--surface2)', color: 'var(--muted)' }}
                 >
-                  <X size={20} />
+                  <X size={18} />
                 </button>
               </div>
-              <div className={`${themes[theme].light} ${themes[theme].text} p-3 rounded-2xl w-fit mx-auto mb-6`}>
+              <div
+                className="w-fit mx-auto mb-6 p-3 rounded-[16px]"
+                style={{ background: 'var(--accent-dim)', color: 'var(--accent)' }}
+              >
                 <Target size={24} />
               </div>
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2">Valor a adicionar (R$)</label>
+                  <label className="block text-[13px] font-medium mb-2" style={{ color: 'var(--muted)' }}>
+                    Valor a adicionar (R$)
+                  </label>
                   <CurrencyInput
                     value={progressAmount}
                     onValueChange={(value) => setProgressAmount(value || '')}
-                    className={`w-full p-3 rounded-xl border ${
-                      darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-200'
-                    } outline-none focus:ring-2 focus:ring-emerald-500`}
+                    className="w-full p-3.5 rounded-[14px] border outline-none focus:ring-2 tnum"
+                    style={{ background: 'var(--surface2)', borderColor: 'var(--line)', color: 'var(--text)' }}
                     placeholder="0,00"
                     decimalsLimit={2}
                     decimalSeparator=","
@@ -236,16 +260,16 @@ export function GoalsScreen() {
                 <div className="flex gap-3">
                   <button
                     onClick={() => setShowProgressModal(false)}
-                    className={`flex-1 py-3 rounded-xl font-semibold border ${
-                      darkMode ? 'border-gray-600' : 'border-gray-200'
-                    }`}
+                    className="flex-1 py-3 rounded-[14px] font-semibold border"
+                    style={{ borderColor: 'var(--line)', color: 'var(--text)' }}
                   >
                     Cancelar
                   </button>
                   <button
                     onClick={handleSaveProgress}
                     disabled={!progressAmount || parseFloat(progressAmount) <= 0}
-                    className={`${themes[theme].primary} flex-1 py-3 rounded-xl font-semibold text-white shadow-lg disabled:opacity-50`}
+                    className="flex-1 py-3 rounded-[14px] font-semibold disabled:opacity-50"
+                    style={{ background: 'var(--accent)', color: 'var(--accent-on)' }}
                   >
                     Adicionar
                   </button>

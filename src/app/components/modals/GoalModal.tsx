@@ -8,16 +8,19 @@ import { themes } from '../../constants/ui';
 import { Goal } from '../../types';
 import { logError } from '../../utils/logger';
 
+const fieldClass = 'w-full p-3.5 rounded-[14px] border outline-none transition-all';
+const fieldStyle = { background: 'var(--surface2)', borderColor: 'var(--line)', color: 'var(--text)' };
+const labelClass = 'block text-[13px] font-medium mb-2';
+const labelStyle = { color: 'var(--muted)' };
+
 export function GoalModal({
   show,
   onClose,
-  darkMode,
   theme,
   editGoal,
 }: {
   show: boolean;
   onClose: () => void;
-  darkMode: boolean;
   theme: keyof typeof themes;
   editGoal?: Goal | null;
 }) {
@@ -111,24 +114,24 @@ export function GoalModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 8 }}
             transition={{ type: 'spring', damping: 26, stiffness: 320 }}
-            className={`relative z-10 w-full max-w-sm flex flex-col ${
-              darkMode ? 'bg-gray-800' : 'bg-white'
-            } rounded-3xl shadow-2xl`}
-            style={{ maxHeight: '80vh' }}
+            className="relative z-10 w-full max-w-sm flex flex-col rounded-[24px] border shadow-2xl"
+            style={{ maxHeight: '80vh', background: 'var(--surface)', borderColor: 'var(--line)' }}
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className={`flex-shrink-0 px-6 pt-5 pb-4 border-b ${darkMode ? 'border-gray-700' : 'border-gray-100'}`}>
+            <div className="flex-shrink-0 px-6 pt-5 pb-4 border-b" style={{ borderColor: 'var(--line)' }}>
               <div className="flex items-center justify-between">
-                <h3 className="text-xl font-bold">
-                  {editGoal ? 'Editar Meta' : 'Nova Meta'}
+                <h3 className="text-[19px] font-bold">
+                  {editGoal ? 'Editar meta' : 'Nova meta'}
                 </h3>
                 <button
                   type="button"
                   onClick={onClose}
-                  className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                  aria-label="Fechar"
+                  className="w-9 h-9 rounded-full flex items-center justify-center"
+                  style={{ background: 'var(--surface2)', color: 'var(--muted)' }}
                 >
-                  <X size={20} />
+                  <X size={18} />
                 </button>
               </div>
             </div>
@@ -136,30 +139,28 @@ export function GoalModal({
             {/* Conteúdo scrollável */}
             <div className="flex-1 min-h-0 overflow-y-auto">
               {error && (
-                <div className="mx-6 mt-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-xl">
-                  <p className="text-red-600 dark:text-red-400 text-sm font-medium">{error}</p>
+                <div
+                  className="mx-6 mt-4 p-3 rounded-[12px] border"
+                  style={{ background: 'rgba(207,91,63,.1)', borderColor: 'rgba(207,91,63,.3)' }}
+                >
+                  <p className="text-[13px] font-medium" style={{ color: 'var(--expense)' }}>{error}</p>
                 </div>
               )}
               <form onSubmit={handleSubmit} className="p-6 space-y-4">
                 <div>
-                  <label className="block text-sm font-medium mb-2 opacity-70">
-                    Nome da Meta
-                  </label>
+                  <label className={labelClass} style={labelStyle}>Nome da meta</label>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => { setName(e.target.value); setError(null); }}
                     placeholder="Ex: Viagem para Paris"
-                    className={`w-full p-4 rounded-2xl border ${
-                      darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-100'
-                    } focus:ring-2 focus:ring-emerald-500/20 outline-none transition-all`}
+                    className={`${fieldClass} focus:ring-2`}
+                    style={fieldStyle}
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2 opacity-70">
-                    Valor da Meta
-                  </label>
+                  <label className={labelClass} style={labelStyle}>Valor da meta</label>
                   <CurrencyInput
                     value={targetAmount}
                     onValueChange={(value) => { setTargetAmount(value || ''); setError(null); }}
@@ -168,16 +169,13 @@ export function GoalModal({
                     decimalSeparator=","
                     groupSeparator="."
                     placeholder="R$ 0,00"
-                    className={`w-full p-4 rounded-2xl border ${
-                      darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-100'
-                    } focus:ring-2 focus:ring-emerald-500 outline-none font-bold text-xl`}
+                    className={`${fieldClass} font-bold text-xl tnum focus:ring-2`}
+                    style={fieldStyle}
                     required
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium mb-2 opacity-70">
-                    Valor Atual (já economizado)
-                  </label>
+                  <label className={labelClass} style={labelStyle}>Valor atual (já economizado)</label>
                   <CurrencyInput
                     value={currentAmount}
                     onValueChange={(value) => setCurrentAmount(value || '')}
@@ -186,16 +184,16 @@ export function GoalModal({
                     decimalSeparator=","
                     groupSeparator="."
                     placeholder="R$ 0,00"
-                    className={`w-full p-4 rounded-2xl border ${
-                      darkMode ? 'bg-gray-700 border-gray-600' : 'bg-gray-50 border-gray-100'
-                    } focus:ring-2 focus:ring-emerald-500 outline-none font-bold text-xl`}
+                    className={`${fieldClass} font-bold text-xl tnum focus:ring-2`}
+                    style={fieldStyle}
                   />
                 </div>
                 <button
                   type="submit"
-                  className="w-full py-4 theme-primary text-white rounded-2xl font-bold shadow-lg mt-2 active:scale-95 transition-all"
+                  className="w-full py-3.5 rounded-[16px] font-bold mt-2 active:scale-95 transition-all"
+                  style={{ background: 'var(--accent)', color: 'var(--accent-on)' }}
                 >
-                  {editGoal ? 'Atualizar Meta' : 'Criar Meta'}
+                  {editGoal ? 'Atualizar meta' : 'Criar meta'}
                 </button>
               </form>
             </div>
