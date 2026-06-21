@@ -14,7 +14,7 @@ export function TransactionModal({
   if (!show) return null;
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-[1000]">
+      <div className="fixed inset-0 z-[1000] flex items-end justify-center">
         {/* Backdrop */}
         <motion.div
           initial={{ opacity: 0 }}
@@ -33,7 +33,7 @@ export function TransactionModal({
             damping: 28,
             stiffness: 300,
           }}
-          className="absolute bottom-0 left-0 right-0 rounded-t-[28px] shadow-2xl z-[1001] border-t"
+          className="relative w-full max-w-md rounded-t-[28px] shadow-2xl z-[1001] border-t"
           style={{ maxHeight: 'calc(92vh - env(safe-area-inset-top, 0px))', background: 'var(--surface)', borderColor: 'var(--line)' }}
           onClick={(e) => e.stopPropagation()}
         >

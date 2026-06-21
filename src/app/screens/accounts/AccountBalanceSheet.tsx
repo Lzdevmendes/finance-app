@@ -22,7 +22,7 @@ export function AccountBalanceSheet({ open, label, initial, onClose, onSave }: A
   return (
     <AnimatePresence>
       {open && (
-        <div className="fixed inset-0 z-[1000]">
+        <div className="fixed inset-0 z-[1000] flex items-end justify-center">
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -35,7 +35,7 @@ export function AccountBalanceSheet({ open, label, initial, onClose, onSave }: A
             animate={{ y: 0 }}
             exit={{ y: '100%' }}
             transition={{ type: 'spring', damping: 28, stiffness: 300 }}
-            className="absolute bottom-0 left-0 right-0 p-6 rounded-t-[28px] shadow-2xl z-[1001] border-t"
+            className="relative w-full max-w-md p-6 rounded-t-[28px] shadow-2xl z-[1001] border-t"
             style={{
               background: 'var(--surface)',
               borderColor: 'var(--line)',
